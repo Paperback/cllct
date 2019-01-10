@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+require 'nokogiri'
+require 'csv'
+releases = []
+CSV.open('../releases.csv', 'wb') do |csv|
+	Dir.glob("archive/*").each do |glob|
+		next if glob =~ /(.*).bak$/
+		file = IO.read(glob)
+		page = Nokogiri::HTML(file)
+		page.css('.view-item-discography').each do |item|
+			image = item.css('.view-data-node_data_field_cover_field_cover_fid img')[0]['src']
+			name = item.css('.view-data-node_title a')[0].text
+			year = item.css('.view-data-node_data_field_year_field_year_value')[0].text
+
+			artist = glob.gsub(/^archive/, '')
+			csv << [year, image, name, artist]
+		end
+	end
+end
+
+# <div class="content"><div class="view view-discography"><div class="view-content view-content-discography"><table class="paledisc"><tr><td class="view-grid-item"><div class="view-item view-item-discography"><div class="view-field view-data-node_data_field_cover_field_cover_fid"><a href="http://cllct.com:80/release/drdavesingle"><img src="https://web.archive.org/web/20121001063228im_/http://cllct.com/files/imagecache/100x100resize/files/releasecover/3015/October 9, 2011 - 1:01am/2.jpg" alt="2.jpg" title="2.jpg"/></a></div><div class="view-field view-data-node_title"><a href="http://cllct.com:80/release/drdavesingle">Dr Dave (Single)</a></div><div class="view-field view-data-node_data_field_year_field_year_value">2011</div></div></td>
+# <td class="view-grid-item"><div class="view-item view-item-discography"><div class="view-field view-data-node_data_field_cover_field_cover_fid"><a href="http://cllct.com:80/release/benefitsofbarcodesoftwareinretailbusiness"><img src="https://web.archive.org/web/20121001063228im_/http://cllct.com/files/imagecache/100x100resize/files/releasecover/9891/June 24, 2011 - 7:39am/barcodelabeldesign.jpg" alt="barcodelabeldesign.jpg" title="barcodelabeldesign.jpg"/></a></div><div class="view-field view-data-node_title"><a href="http://cllct.com:80/release/benefitsofbarcodesoftwareinretailbusiness">Benefits of bar code software in retail business</a></div><div class="view-field view-data-node_data_field_year_field_year_value">1980</div></div></td>
